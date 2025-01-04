@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -25,7 +26,8 @@ func SetupServer(rd *Config) (engine *gin.Engine) {
 }
 
 func setupSemaphore(engine *gin.Engine) {
-	sema := semaphore.NewWeighted(10)
+	_, max := getMaxThrottlingRules()
+	sema := semaphore.NewWeighted(max)
 	engine.Use(func(c *gin.Context) {
 		if err := sema.Acquire(c.Request.Context(), 1); err != nil {
 			c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"error": "Too many requests"})
@@ -67,7 +69,8 @@ func setupRedisDB(engine *gin.Engine, cfg *Config) {
 
 		log.Println("New request from IP: ", ip, " with count: ", val)
 		requestCount, _ := strconv.Atoi(val)
-		if requestCount >= 20 {
+		max, _ := getMaxThrottlingRules()
+		if requestCount >= int(max) {
 			ttl, err := cfg.Redis.TTL(context.Background(), ip).Result()
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
@@ -85,4 +88,29 @@ func setupRedisDB(engine *gin.Engine, cfg *Config) {
 		}
 		c.Next()
 	})
+}
+
+// getMaxRequestCount returns the maximum number of requests allowed
+func getMaxThrottlingRules() (countByIP int64, countGlobal int64) {
+	defaultCountByIP := int64(5)
+	defaultCountGlobal := int64(10)
+
+	countByIP = getEnvAsInt64("MAX_REQUEST_COUNT_BY_IP", defaultCountByIP)
+	countGlobal = getEnvAsInt64("MAX_REQUEST_COUNT_GLOBAL", defaultCountGlobal)
+
+	return countByIP, countGlobal
+}
+
+func getEnvAsInt64(name string, defaultValue int64) int64 {
+	valueStr := os.Getenv(name)
+	if valueStr == "" {
+		return defaultValue
+	}
+
+	value, err := strconv.Atoi(valueStr)
+	if err != nil {
+		return defaultValue
+	}
+
+	return int64(value)
 }
