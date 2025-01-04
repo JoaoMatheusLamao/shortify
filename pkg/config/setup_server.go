@@ -1,8 +1,8 @@
 package config
 
 import (
+	"context"
 	"net/http"
-	"shortify/pkg/persistence"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -10,13 +10,12 @@ import (
 )
 
 // SetupServer sets up a new gin engine with a semaphore and cors middleware
-func SetupServer() (engine *gin.Engine) {
+func SetupServer(rd *Redis) (engine *gin.Engine) {
 	engine = gin.Default()
 
 	setupSemaphore(engine)
 	setupCors(engine)
-
-	setupInMemoryDB(engine)
+	setupRedisDB(engine, rd)
 
 	return engine
 }
@@ -43,9 +42,7 @@ func setupCors(engine *gin.Engine) {
 	}))
 }
 
-func setupInMemoryDB(engine *gin.Engine) (db *persistence.InMemoryDB) {
-	db = persistence.NewInMemoryDB()
-	db.Flush()
-	engine.Use(db.Handler())
-	return db
+func setupRedisDB(engine *gin.Engine, rd *Redis) {
+	rd.FlushAll(context.Background())
+	engine.Use(rd.Handler())
 }
