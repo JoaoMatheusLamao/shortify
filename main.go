@@ -10,13 +10,23 @@ import (
 
 func main() {
 
-	log.Println("Starting server...")
-
 	gin.SetMode(gin.DebugMode)
 
-	engine, db := config.SetupServer()
+	log.Println("Starting server...")
 
-	routes.InitiateRoutes(engine, db)
+	engine := config.SetupServer()
+
+	log.Println("Connecting to Redis...")
+	rd, err := config.NewRedis()
+	if err != nil {
+		log.Fatal(err.Error())
+		return
+	}
+
+	log.Println("Initializing routes...")
+	routes.InitiateRoutes(engine, rd)
 
 	engine.Run(":8080")
+
+	log.Println("Server started on port 8080")
 }

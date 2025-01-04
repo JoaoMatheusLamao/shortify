@@ -10,15 +10,15 @@ import (
 )
 
 // SetupServer sets up a new gin engine with a semaphore and cors middleware
-func SetupServer() (engine *gin.Engine, db *persistence.InMemoryDB) {
+func SetupServer() (engine *gin.Engine) {
 	engine = gin.Default()
 
 	setupSemaphore(engine)
 	setupCors(engine)
 
-	db = setupInMemoryDB(engine)
+	setupInMemoryDB(engine)
 
-	return engine, db
+	return engine
 }
 
 func setupSemaphore(engine *gin.Engine) {

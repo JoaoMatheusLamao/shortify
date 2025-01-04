@@ -19,19 +19,13 @@ This project is a URL shortener built with Go and Gin. It allows users to shorte
     cd shortify
     ```
 
-2. Build the Docker image:
+2. Run the Docker Compose containers:
 
     ```sh
-    docker build -t shortify-image .
+    docker compose up -d --build
     ```
 
-3. Run the Docker container:
-
-    ```sh
-    docker run -d -p 8080:8080 --name shortify-container shortify-image ./main
-    ```
-
-4. The server will be available at `http://localhost:8080`.
+3. The server will be available at `http://localhost:8080`.
 
 ## Endpoints
 
