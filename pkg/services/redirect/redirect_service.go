@@ -9,13 +9,13 @@ import (
 )
 
 // FindOriginalURLAndRedirect is a function that redirects the user to the original URL
-func FindOriginalURLAndRedirect(rd *config.Redis) gin.HandlerFunc {
+func FindOriginalURLAndRedirect(cfg *config.Config) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 
 		shortURL := c.Param("shortURL")
 
-		originalURL, err := rd.Get(context.Background(), shortURL).Result()
+		originalURL, err := cfg.Redis.Get(context.Background(), shortURL).Result()
 		if err == redis.Nil {
 			c.JSON(404, gin.H{"error": "URL not found"})
 			return

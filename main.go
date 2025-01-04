@@ -15,20 +15,19 @@ func main() {
 
 	log.Println("Starting server...")
 
-	log.Println("Connecting to Redis...")
-	rd, err := config.NewRedis()
+	cfg, err := config.NewConfig()
 	if err != nil {
 		log.Fatal(err.Error())
 		return
 	}
 
-	defer rd.Close()
+	defer cfg.CloseAll()
 
 	log.Println("Setting up server...")
-	engine := config.SetupServer(rd)
+	engine := config.SetupServer(cfg)
 
 	log.Println("Initializing routes...")
-	routes.InitiateRoutes(engine, rd)
+	routes.InitiateRoutes(engine, cfg)
 
 	engine.Run(":" + getPort())
 

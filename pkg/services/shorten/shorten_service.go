@@ -14,7 +14,7 @@ import (
 )
 
 // CreateShortenURL is a controller that creates a short URL
-func CreateShortenURL(rd *config.Redis) gin.HandlerFunc {
+func CreateShortenURL(cfg *config.Config) gin.HandlerFunc {
 
 	var input struct {
 		OriginalURL string `json:"original_url" binding:"required"`
@@ -31,7 +31,7 @@ func CreateShortenURL(rd *config.Redis) gin.HandlerFunc {
 			return
 		}
 
-		shortURL, err := generateShortURL(input.OriginalURL, rd)
+		shortURL, err := generateShortURL(input.OriginalURL, cfg)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -44,12 +44,12 @@ func CreateShortenURL(rd *config.Redis) gin.HandlerFunc {
 	}
 }
 
-func generateShortURL(originalURL string, rd *config.Redis) (string, error) {
+func generateShortURL(originalURL string, cfg *config.Config) (string, error) {
 
 	id := utils.GenerateUniqueID(originalURL)
-	_, err := rd.Get(context.Background(), id).Result()
+	_, err := cfg.Redis.Get(context.Background(), id).Result()
 	if err == redis.Nil {
-		err = rd.Set(context.Background(), id, originalURL, 5*time.Hour).Err()
+		err = cfg.Redis.Set(context.Background(), id, originalURL, 5*time.Hour).Err()
 		if err != nil {
 			return "", errors.New("Error saving the short URL to the database: " + err.Error())
 		}
