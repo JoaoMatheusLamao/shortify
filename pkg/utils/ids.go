@@ -8,6 +8,7 @@ import (
 	"golang.org/x/exp/rand"
 )
 
+// GenerateUniqueID generates a unique ID based on the input
 func GenerateUniqueID(in ...string) string {
 
 	if len(in) == 0 {

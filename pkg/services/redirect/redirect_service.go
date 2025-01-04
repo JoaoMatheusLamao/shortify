@@ -8,8 +8,8 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-// RedirectControler is a function that redirects the user to the original URL
-func RedirectControler(rd *config.Redis) gin.HandlerFunc {
+// FindOriginalURLAndRedirect is a function that redirects the user to the original URL
+func FindOriginalURLAndRedirect(rd *config.Redis) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 

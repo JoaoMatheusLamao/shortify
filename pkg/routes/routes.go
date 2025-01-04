@@ -11,10 +11,13 @@ import (
 
 // InitiateRoutes is a function that initializes the routes for the application
 func InitiateRoutes(engine *gin.Engine, rd *config.Redis) {
-	engine.GET("/healthcheck", healthcheck.HealthCheckControler)
+	healthGroup := engine.Group("/healthcheck")
+	healthGroup.GET("/", healthcheck.HealthCheck)
 
-	engine.POST("/shorten", shorten.ShortenControler(rd))
+	shortenGroup := engine.Group("/shorten")
+	shortenGroup.POST("/", shorten.CreateShortenURL(rd))
 
-	engine.GET("/r/:shortURL", redirect.RedirectControler(rd))
+	redirectGroup := engine.Group("/r")
+	redirectGroup.GET("/:shortURL", redirect.FindOriginalURLAndRedirect(rd))
 
 }

@@ -13,8 +13,8 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-// ShortenControler is a controller that returns a 200 status code
-func ShortenControler(rd *config.Redis) gin.HandlerFunc {
+// CreateShortenURL is a controller that creates a short URL
+func CreateShortenURL(rd *config.Redis) gin.HandlerFunc {
 
 	var input struct {
 		OriginalURL string `json:"original_url" binding:"required"`
@@ -31,31 +31,17 @@ func ShortenControler(rd *config.Redis) gin.HandlerFunc {
 			return
 		}
 
-		protocolAndHost := utils.GetCurrentProtocolAndHost(c)
-
-		shortURL, err := shorten(input.OriginalURL, rd)
+		shortURL, err := generateShortURL(input.OriginalURL, rd)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
+		protocolAndHost := utils.GetCurrentProtocolAndHost(c)
 		response.ShortURL = fmt.Sprintf("%s/r/%s", protocolAndHost, shortURL)
 
 		c.JSON(http.StatusOK, response)
 	}
-
-}
-
-// shorten is a service that returns a short URL
-func shorten(originalURL string, rd *config.Redis) (string, error) {
-
-	shortURL, err := generateShortURL(originalURL, rd)
-	if err != nil {
-		return "", err
-	}
-
-	return shortURL, nil
-
 }
 
 func generateShortURL(originalURL string, rd *config.Redis) (string, error) {
