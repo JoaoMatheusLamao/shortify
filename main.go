@@ -20,8 +20,6 @@ func main() {
 
 	gin.SetMode(gin.DebugMode)
 
-	log.Println("Starting server...")
-
 	cfg, err := config.NewConfig()
 	if err != nil {
 		log.Fatal(err.Error())
@@ -30,7 +28,6 @@ func main() {
 
 	defer cfg.CloseAll()
 
-	log.Println("Setting up server...")
 	engine := config.SetupServer(cfg)
 
 	log.Println("Initializing routes...")
