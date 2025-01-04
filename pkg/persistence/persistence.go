@@ -32,7 +32,7 @@ func (db *InMemoryDB) Handler() gin.HandlerFunc {
 		}
 
 		requestCount := val.(int)
-		if requestCount >= 2 {
+		if requestCount >= 20 {
 			db.Cache.Increment(ip, 1)
 			c.Writer.Header().Set("Retry-After", ttl.Sub(time.Now()).String())
 			c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"error": "Too many requests"})
