@@ -7,8 +7,8 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-// newRedis is a function that returns a new Redis client
-func (cfg *Config) newRedis() error {
+// newClientRedis is a function that returns a new Redis client
+func (cfg *Config) newClientRedis() error {
 
 	addr := "localhost:6379"
 
