@@ -1,10 +1,10 @@
 package utils
 
 import (
-	"strconv"
+	"crypto/md5"
+	"encoding/hex"
 	"time"
 
-	"github.com/mitchellh/hashstructure/v2"
 	"golang.org/x/exp/rand"
 )
 
@@ -15,11 +15,13 @@ func GenerateUniqueID(in ...string) string {
 		return randomString()
 	}
 
-	hash, err := hashstructure.Hash(in[0], hashstructure.FormatV2, nil)
-	if err != nil {
-		return randomString()
-	}
-	return strconv.FormatUint(hash, 10)
+	return generateShortHash(in[0])
+}
+
+// generateShortHash generates a unique hash (MD5) for the input string and returns the first 10 characters
+func generateShortHash(input string) string {
+	hash := md5.Sum([]byte(input))
+	return hex.EncodeToString(hash[:])[:10]
 }
 
 // randomString generates a random string {
