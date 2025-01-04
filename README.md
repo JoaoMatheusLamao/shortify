@@ -4,7 +4,7 @@ Shortify is a simple URL shortener that uses in-memory persistence.
 
 ## Description
 
-This project is a URL shortener built with Go and Gin. It allows users to shorten long URLs and store them in memory for quick access.
+This project is a URL shortener built with Go and Gin. It allows users to shorten long URLs and store them in memory (Redis) for quick access.
 
 ## Prerequisites
 
@@ -31,13 +31,39 @@ This project is a URL shortener built with Go and Gin. It allows users to shorte
 
 - `GET /healthcheck`: Checks if the server is running.
 - `POST /shorten`: Shortens a URL.
-- `GET /:shortURL`: Redirects to the original URL.
+
+    **Request:**
+
+    ```curl
+    curl --location --request POST 'http://localhost:8080/shorten' \
+    --header 'Content-Type: application/json' \
+    --data '{
+        "original_url": "https://youtube.com"
+    }'
+    ```
+
+    **Response:**
+
+    ```json
+    {
+        "short_url": "http://localhost:8080/r/12463977768470384210"
+    }
+    ```
+
+- `GET /r/:shortURL`: Redirects to the original URL.
+
+    **Request:**
+
+    ```curl
+    curl --location --request GET 'http://localhost:8080/r/12463977768470384210'
+    ```
 
 ## Technologies Used
 
 - Go
 - Gin
 - Docker
+- Redis
 
 ## Contribution
 
