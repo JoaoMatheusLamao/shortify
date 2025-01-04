@@ -6,6 +6,8 @@ Shortify is a simple URL shortener that uses in-memory persistence.
 
 This project is a URL shortener built with Go and Gin. It allows users to shorten long URLs and store them in memory (Redis) for quick access.
 
+Additionally, the project has in-memory IP access control to ensure against hacker attacks (DDoS)
+
 ## Prerequisites
 
 - Docker
