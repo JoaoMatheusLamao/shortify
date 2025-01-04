@@ -2,10 +2,10 @@ package redirect
 
 import (
 	"context"
-	"errors"
 	"shortify/pkg/config"
 
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 )
 
 // RedirectControler is a function that redirects the user to the original URL
@@ -15,22 +15,15 @@ func RedirectControler(rd *config.Redis) gin.HandlerFunc {
 
 		shortURL := c.Param("shortURL")
 
-		originalURL, err := redirect(shortURL, rd)
-		if err != nil {
-			c.JSON(404, gin.H{"error": err.Error()})
+		originalURL, err := rd.Get(context.Background(), shortURL).Result()
+		if err == redis.Nil {
+			c.JSON(404, gin.H{"error": "URL not found"})
+			return
+		} else if err != nil {
+			c.JSON(500, gin.H{"error": "Internal server error: " + err.Error()})
 			return
 		}
 
 		c.Redirect(302, originalURL)
 	}
-}
-
-// redirect is a function that redirects the user to the original URL
-func redirect(id string, rd *config.Redis) (string, error) {
-	url, err := rd.Get(context.Background(), id).Result()
-	if err != nil {
-		return "", errors.New("Error getting the short URL from the database: " + err.Error())
-	}
-
-	return url, nil
 }
