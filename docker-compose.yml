@@ -9,8 +9,6 @@ services:
       - app_network
     depends_on:
       - redis
-    environment:
-      - ENVIROMENT_EXEC=prod
   redis:
     image: redis:alpine
     container_name: redis

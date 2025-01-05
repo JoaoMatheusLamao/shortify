@@ -11,16 +11,20 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
+	"github.com/unrolled/secure"
 	"golang.org/x/sync/semaphore"
 )
 
 // SetupServer sets up a new gin engine with a semaphore and cors middleware
 func SetupServer(rd *Config) (engine *gin.Engine) {
-	engine = gin.Default()
+
+	gin.SetMode(gin.ReleaseMode)
+	engine = gin.New()
 
 	setupSemaphore(engine)
 	setupCors(engine)
 	setupRedisDB(engine, rd)
+	setupSSL(engine)
 
 	return engine
 }
@@ -99,6 +103,23 @@ func getMaxThrottlingRules() (countByIP int64, countGlobal int64) {
 	countGlobal = getEnvAsInt64("MAX_REQUEST_COUNT_GLOBAL", defaultCountGlobal)
 
 	return countByIP, countGlobal
+}
+
+// setupSSL is a function that sets up the SSL configuration for the server
+func setupSSL(engine *gin.Engine) {
+
+	engine.Use(func(c *gin.Context) {
+		secureMiddleware := secure.New(secure.Options{
+			SSLRedirect: true,
+			SSLHost:     ":8080",
+		})
+		err := secureMiddleware.Process(c.Writer, c.Request)
+		if err != nil {
+			log.Println("Error traying make a secure https: " + err.Error())
+			return
+		}
+		c.Next()
+	})
 }
 
 func getEnvAsInt64(name string, defaultValue int64) int64 {
