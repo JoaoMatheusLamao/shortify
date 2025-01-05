@@ -42,7 +42,7 @@ COPY --from=build /app/main .
 COPY --from=build /app/.env .
 
 # Ensure the executable has the correct permissions
-RUN chmod +x main
+RUN chmod +rx main
 
 RUN ls -la
 
