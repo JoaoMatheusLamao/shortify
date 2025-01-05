@@ -2,12 +2,11 @@ package main
 
 import (
 	"log"
-	"net/http"
 	"os"
 	"shortify/pkg/config"
 	"shortify/pkg/routes"
-	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
@@ -24,37 +23,25 @@ func main() {
 
 	engine := config.SetupServer(cfg)
 
-	log.Println("Initializing routes...")
 	routes.InitiateRoutes(engine, cfg)
 
-	startServer(createServer(engine))
+	startServer(engine)
 }
 
-func createServer(handler http.Handler) *http.Server {
-	return &http.Server{
-		Addr:         ":" + getPort(),
-		Handler:      handler,
-		ReadTimeout:  60 * time.Second,
-		WriteTimeout: 30 * time.Second,
-	}
-}
-
-func startServer(server *http.Server) {
+func startServer(engine *gin.Engine) {
 	certFile, keyFile := getCertFiles()
 	if certFile != "" && keyFile != "" {
 		log.Println("Starting server with TLS...")
-		log.Println("Cert file: " + certFile)
-		log.Println("Key file: " + keyFile)
-		if err := server.ListenAndServeTLS(certFile, keyFile); err != nil {
+		if err := engine.RunTLS(":8080", certFile, keyFile); err != nil {
 			log.Fatalf("Error starting TLS server: %v", err)
 		}
 	} else {
 		log.Println("Starting server...")
-		if err := server.ListenAndServe(); err != nil {
+		if err := engine.Run(":8080"); err != nil {
 			log.Fatalf("Error starting server: %v", err)
 		}
 	}
-	log.Println("Server started on port " + getPort())
+	log.Println("Server started on port 8080")
 }
 
 // getPort returns the port from the environment variable PORT
