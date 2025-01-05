@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"shortify/pkg/config"
 	"shortify/pkg/utils"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -79,6 +80,7 @@ func insertShortURLInMongo(shortURL string, originalURL string, ip string, cfg *
 	collection := cfg.Mongo.Database("shortify").Collection("short_urls")
 
 	filter := bson.D{{Key: "original_url", Value: originalURL}}
+	safeIP := strings.ReplaceAll(ip, ".", "_")
 	update := bson.D{
 		{Key: "$setOnInsert", Value: bson.D{
 			{Key: "short_url", Value: shortURL},
@@ -89,7 +91,7 @@ func insertShortURLInMongo(shortURL string, originalURL string, ip string, cfg *
 		}},
 		{Key: "$inc", Value: bson.D{
 			{Key: "counter_creation", Value: 1},
-			{Key: fmt.Sprintf("ip_counter_creation.%s", ip), Value: 1},
+			{Key: fmt.Sprintf("ip_counter_creation.%s", safeIP), Value: 1},
 		}},
 	}
 	opts := options.Update().SetUpsert(true)
