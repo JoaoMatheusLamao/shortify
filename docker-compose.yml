@@ -1,17 +1,16 @@
 services:
-  shortify:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    networks:
-      - app_network
-    depends_on:
-      - redis
-    environment:
-      - ENVIROMENT_EXEC=prod
-
+  # shortify:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "8080:8080"
+  #   networks:
+  #     - app_network
+  #   depends_on:
+  #     - redis
+  #   environment:
+  #     - ENVIROMENT_EXEC=prod
   redis:
     image: redis:alpine
     container_name: redis
