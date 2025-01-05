@@ -43,6 +43,8 @@ func startServer(server *http.Server) {
 	certFile, keyFile := getCertFiles()
 	if certFile != "" && keyFile != "" {
 		log.Println("Starting server with TLS...")
+		log.Println("Cert file: " + certFile)
+		log.Println("Key file: " + keyFile)
 		if err := server.ListenAndServeTLS(certFile, keyFile); err != nil {
 			log.Fatalf("Error starting TLS server: %v", err)
 		}
