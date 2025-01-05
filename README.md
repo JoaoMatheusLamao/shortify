@@ -8,6 +8,8 @@ This project is a URL shortener built with Go and Gin. It allows users to shorte
 
 Additionally, the project has in-memory IP access control to ensure against hacker attacks (DDoS)
 
+We also save metrics in MongoDB using goroutines to avoid impacting the application's performance.
+
 ## Prerequisites
 
 - Docker
