@@ -5,15 +5,15 @@ on:
     branches:
       - main
 jobs:
-  deploy:
+  fmt-vet:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 3
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v3
       with:
           fetch-depth: 0
-        
+
     - name: Set Up Go
       uses: actions/setup-go@v4
       with:
@@ -31,8 +31,15 @@ jobs:
     - name: Run Go Vet
       run: go vet $(go list ./... | grep -v /vendor/)
 
-    - name: Validate Directory Structure
-      run: tree -L 2
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: fmt-vet
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+      with:
+          fetch-depth: 0
 
     - name: Configure SSH Key
       uses: webfactory/ssh-agent@v0.5.3
@@ -55,6 +62,16 @@ jobs:
           sudo docker system prune -a -f --volumes
           sudo docker compose up -d --build
         EOF
+  
+  tag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    needs: [fmt-vet,deploy]
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+      with:
+          fetch-depth: 0
 
     - name: Get Last Tag and Increment
       run: |
