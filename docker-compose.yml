@@ -11,7 +11,7 @@ services:
       - redis
     volumes:
       - shortify_data:/app/certificates
-      - /etc/letsencrypt/live/shortify.ininetech.com.br:/app/certificates
+      - /etc/letsencrypt/archive/shortify.ininetech.com.br:/app/certificates
     
   redis:
     image: redis:alpine
