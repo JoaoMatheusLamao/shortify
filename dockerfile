@@ -16,6 +16,8 @@ RUN go mod download
 # Copy the source code into the container
 COPY . .
 
+RUN ls -la
+
 # Build the Go application
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-extldflags '-static'" -o main .
 
