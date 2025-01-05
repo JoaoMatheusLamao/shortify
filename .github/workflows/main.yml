@@ -1,0 +1,50 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main  # Aciona o workflow apenas na branch principal
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout do código do repositório
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # Configura a chave SSH
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.8.1
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    # Copia os arquivos necessários para o servidor
+    - name: Copy files to server
+      run: |
+        rsync -avz --exclude '.git' ./ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/${{ secrets.SERVER_USER }}/app
+
+    # Executa comandos no servidor
+    - name: Deploy with Docker Compose
+      run: |
+        ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << EOF
+          cd /home/${{ secrets.SERVER_USER }}/app
+          docker-compose down
+          docker-compose up -d --build
+        EOF
+
+    # Cria e publica uma nova tag no repositório
+    - name: Generate and push tag
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Obtém a última tag e incrementa
+        LAST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1) || echo "v0.0.0")
+        NEW_TAG=$(echo $LAST_TAG | awk -F. '{printf "v%d.%d.%d", $1, $2, $3+1}')
+
+        # Cria a nova tag
+        git tag $NEW_TAG
+        git push origin $NEW_TAG
+
+        echo "New tag $NEW_TAG created and pushed."
