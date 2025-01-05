@@ -18,7 +18,7 @@ func main() {
 		return
 	}
 
-	gin.SetMode(gin.DebugMode)
+	gin.SetMode(gin.ReleaseMode)
 
 	cfg, err := config.NewConfig()
 	if err != nil {
