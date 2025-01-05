@@ -10,7 +10,7 @@ services:
     depends_on:
       - redis
     volumes:
-      - shortify_data:/app
+      - shortify_data:/app/certificates
     
   redis:
     image: redis:alpine
@@ -32,7 +32,7 @@ volumes:
       type: none
       o: bind
       device: /etc/letsencrypt/live/shortify.ininetech.com.br
-
+      
 networks:
   app_network:
     driver: bridge
