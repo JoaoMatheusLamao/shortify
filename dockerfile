@@ -16,8 +16,6 @@ RUN go mod download
 # Copy the source code into the container
 COPY . .
 
-RUN ls -la
-
 # Build the Go application
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-extldflags '-static'" -o main .
 
@@ -29,6 +27,7 @@ FROM alpine
 
 # Set the working directory in the container
 WORKDIR /app
+
 
 # Install tzdata for timezone support
 RUN apk add --no-cache tzdata
@@ -43,6 +42,8 @@ COPY --from=build /app/main .
 
 # Ensure the executable has the correct permissions
 RUN chmod +x main
+
+RUN ls -la
 
 # Expose port 8080
 EXPOSE 8080
