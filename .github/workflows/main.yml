@@ -38,7 +38,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
           # Obtém a última tag e incrementa
-          LAST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1) || echo "v0.0.0")
+          LAST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
           echo "Last tag: $LAST_TAG"
           
           # Extrai a versão a partir da tag
