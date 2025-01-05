@@ -3,34 +3,28 @@ name: Deploy to Server
 on:
   push:
     branches:
-      - main  # Aciona o workflow apenas na branch principal
-
+      - main
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    # Checkout do código do repositório
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    # Configura a chave SSH
     - name: Configurar chave SSH
       uses: webfactory/ssh-agent@v0.5.3
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    # Adiciona o host remoto ao arquivo known_hosts
     - name: Add remote server to known hosts
       run: |
         ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
-    # Copia os arquivos necessários para o servidor
     - name: Copy files to server
       run: |
         rsync -avz --exclude '.git' ./ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/${{ secrets.SERVER_USER }}/app
 
-    # Executa comandos no servidor
     - name: Deploy with Docker Compose
       run: |
         ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << EOF
@@ -39,17 +33,24 @@ jobs:
           sudo docker compose up -d --build
         EOF
 
-    # Cria e publica uma nova tag no repositório
     - name: Generate and push tag
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        # Obtém a última tag e incrementa
         LAST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1) || echo "v0.0.0")
-        NEW_TAG=$(echo $LAST_TAG | awk -F. '{printf "v%d.%d.%d", $1, $2, $3+1}')
 
-        # Cria a nova tag
+        echo "Last tag: $LAST_TAG"
+        
+        # Extrai a versão a partir da tag
+        VERSION=$(echo $LAST_TAG | sed 's/^v//')
+        IFS='.' read -r -a VERSION_ARRAY <<< "$VERSION"
+
+        PATCH=${VERSION_ARRAY[2]}
+        PATCH=$((PATCH + 1))
+
+        NEW_TAG="v${VERSION_ARRAY[0]}.${VERSION_ARRAY[1]}.$PATCH"
         git tag $NEW_TAG
         git push origin $NEW_TAG
 
         echo "New tag $NEW_TAG created and pushed."
+
