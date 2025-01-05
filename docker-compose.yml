@@ -9,6 +9,8 @@ services:
       - app_network
     depends_on:
       - redis
+    volumes:
+      - /etc/letsencrypt/live/shortify.ininetech.com.br:/app
   redis:
     image: redis:alpine
     container_name: redis
