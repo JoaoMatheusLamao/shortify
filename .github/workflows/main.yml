@@ -11,6 +11,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+      with:
+          fetch-depth: 0
 
     - name: Configurar chave SSH
       uses: webfactory/ssh-agent@v0.5.3
@@ -33,36 +35,41 @@ jobs:
           sudo docker compose up -d --build
         EOF
 
-    - name: Generate and push tag
+    - name: Get last tag and increment
+      run: |
+        # Verifica se há tags no repositório
+        if git rev-list --tags --max-count=1 | grep -q .; then
+            # Obtém a última tag e incrementa
+            LAST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+        else
+            # Se não houver tags, define a tag inicial como v0.0.0
+            LAST_TAG="v0.0.0"
+        fi
+
+        echo "Last tag: $LAST_TAG"
+
+        # Extrai a versão a partir da tag
+        VERSION=$(echo $LAST_TAG | sed 's/^v//')
+        IFS='.' read -r -a VERSION_ARRAY <<< "$VERSION"
+
+        # Incrementa o último número (patch version)
+        PATCH=${VERSION_ARRAY[2]}
+        PATCH=$((PATCH + 1))
+
+        # Cria a nova tag
+        NEW_TAG="v${VERSION_ARRAY[0]}.${VERSION_ARRAY[1]}.$PATCH"
+
+        # Verifica se a tag já existe
+        if git rev-parse "$NEW_TAG" >/dev/null 2>&1; then
+            echo "Tag $NEW_TAG already exists. Incrementing patch version again."
+            PATCH=$((PATCH + 1))  # Incrementa o patch novamente se a tag já existir
+            NEW_TAG="v${VERSION_ARRAY[0]}.${VERSION_ARRAY[1]}.$PATCH"
+        fi
+
+        # Cria a nova tag e empurra para o repositório
+        git tag $NEW_TAG
+        git push origin $NEW_TAG
+
+        echo "New tag $NEW_TAG created and pushed."
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-          # Obtém a última tag e incrementa
-          LAST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
-          echo "Last tag: $LAST_TAG"
-          
-          # Extrai a versão a partir da tag
-          VERSION=$(echo $LAST_TAG | sed 's/^v//')
-          IFS='.' read -r -a VERSION_ARRAY <<< "$VERSION"
-          
-          # Incrementa o último número (patch version)
-          PATCH=${VERSION_ARRAY[2]}
-          PATCH=$((PATCH + 1))
-          
-          # Cria a nova tag
-          NEW_TAG="v${VERSION_ARRAY[0]}.${VERSION_ARRAY[1]}.$PATCH"
-
-          # Verifica se a tag já existe
-          if git rev-parse "$NEW_TAG" >/dev/null 2>&1; then
-              echo "Tag $NEW_TAG already exists. Incrementing patch version again."
-              PATCH=$((PATCH + 1))  # Incrementa o patch novamente se a tag já existir
-              NEW_TAG="v${VERSION_ARRAY[0]}.${VERSION_ARRAY[1]}.$PATCH"
-          fi
-
-          # Cria a nova tag e empurra para o repositório
-          git tag $NEW_TAG
-          git push origin $NEW_TAG
-          
-          echo "New tag $NEW_TAG created and pushed."
-
-
