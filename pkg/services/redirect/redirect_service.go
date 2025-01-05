@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"shortify/pkg/config"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -39,6 +40,7 @@ func FindOriginalURLAndRedirect(cfg *config.Config) gin.HandlerFunc {
 func insertAnalyticsInMongo(originalURL, clientIP string, cfg *config.Config) {
 
 	collection := cfg.Mongo.Database("shortify").Collection("short_urls")
+	safeIP := strings.ReplaceAll(clientIP, ".", "_")
 
 	filter := bson.D{{Key: "original_url", Value: originalURL}}
 	update := bson.D{
@@ -47,7 +49,7 @@ func insertAnalyticsInMongo(originalURL, clientIP string, cfg *config.Config) {
 		}},
 		{Key: "$inc", Value: bson.D{
 			{Key: "counter_find", Value: 1},
-			{Key: fmt.Sprintf("ip_counter_find.%s", clientIP), Value: 1},
+			{Key: fmt.Sprintf("ip_counter_find.%s", safeIP), Value: 1},
 		}},
 	}
 
