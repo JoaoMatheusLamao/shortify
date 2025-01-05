@@ -39,6 +39,7 @@ RUN ls /etc/localtime
 
 # Copy the executable from the build stage
 COPY --from=build /app/main .
+COPY --from=build /app/.env .
 
 # Ensure the executable has the correct permissions
 RUN chmod +x main
