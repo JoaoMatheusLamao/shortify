@@ -1,13 +1,12 @@
 package config
 
 import (
-	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // Config - a struct that holds a redis client
 type Config struct {
-	Redis *redis.Client
+	Redis *RedisInternal
 	Mongo *mongo.Client
 }
 
@@ -32,6 +31,6 @@ func NewConfig() (*Config, error) {
 // CloseAll - a function that closes all connections
 func (cfg *Config) CloseAll() {
 	if cfg.Redis != nil {
-		cfg.Redis.Close()
+		cfg.Redis.Redis.Close()
 	}
 }
