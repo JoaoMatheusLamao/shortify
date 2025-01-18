@@ -1,5 +1,8 @@
 name: Deploy to Server
 
+env:
+  DEPLOY_PATH: /home/${{ secrets.SERVER_USER }}/apps/shortify
+
 on:
   push:
     branches:
@@ -52,7 +55,7 @@ jobs:
 
     - name: Copy Files to Server
       run: |
-        rsync -avz --exclude '.git' ./ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/${{ secrets.SERVER_USER }}/app
+        rsync -avz --exclude '.git' ./ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ env.DEPLOY_PATH }}
 
     - name: Deploy with Docker Compose
       run: |

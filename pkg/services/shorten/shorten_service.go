@@ -20,7 +20,7 @@ import (
 // CreateShortenURL is a controller that creates a short URL
 func CreateShortenURL(cfg *config.Config) gin.HandlerFunc {
 
-	var input struct {
+	var request struct {
 		OriginalURL   string `json:"original_url" binding:"required"`
 		ExpirationMin int    `json:"expiration_min"`
 	}
@@ -31,17 +31,17 @@ func CreateShortenURL(cfg *config.Config) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 
-		if err := c.ShouldBindJSON(&input); err != nil {
+		if err := c.ShouldBindJSON(&request); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
 		expiration := 5 * time.Minute
-		if input.ExpirationMin > 0 {
-			expiration = time.Duration(input.ExpirationMin) * time.Minute
+		if request.ExpirationMin > 0 {
+			expiration = time.Duration(request.ExpirationMin) * time.Minute
 		}
 
-		shortURL, err := generateShortURL(input.OriginalURL, expiration, cfg)
+		shortURL, err := generateShortURL(request.OriginalURL, expiration, cfg)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -52,7 +52,7 @@ func CreateShortenURL(cfg *config.Config) gin.HandlerFunc {
 
 		c.JSON(http.StatusOK, response)
 
-		go insertShortURLInMongo(shortURL, input.OriginalURL, c.ClientIP(), cfg)
+		go insertShortURLInMongo(shortURL, request.OriginalURL, c.ClientIP(), cfg)
 	}
 }
 

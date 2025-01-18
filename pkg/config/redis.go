@@ -9,6 +9,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+// RedisInternal is a struct that contains a Redis client and a mutex
 type RedisInternal struct {
 	Redis *redis.Client
 	mu    sync.Mutex
