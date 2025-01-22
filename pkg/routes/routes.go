@@ -2,9 +2,10 @@ package routes
 
 import (
 	"shortify/pkg/config"
-	"shortify/pkg/services/healthcheck"
-	"shortify/pkg/services/redirect"
-	"shortify/pkg/services/shorten"
+	"shortify/pkg/handlers/fieldmapper"
+	"shortify/pkg/handlers/healthcheck"
+	"shortify/pkg/handlers/redirect"
+	"shortify/pkg/handlers/shorten"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,5 +20,8 @@ func InitiateRoutes(engine *gin.Engine, cfg *config.Config) {
 
 	redirectGroup := engine.Group("/r")
 	redirectGroup.GET("/:shortURL", redirect.FindOriginalURLAndRedirect(cfg))
+
+	mapperGroup := engine.Group("/mapper")
+	mapperGroup.POST("/", fieldmapper.Mapper())
 
 }

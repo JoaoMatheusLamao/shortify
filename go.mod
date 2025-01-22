@@ -3,6 +3,7 @@ module shortify
 go 1.23.2
 
 require (
+	github.com/clbanning/mxj v1.8.4
 	github.com/gin-contrib/cors v1.7.3
 	github.com/gin-gonic/gin v1.10.0
 	github.com/joho/godotenv v1.5.1

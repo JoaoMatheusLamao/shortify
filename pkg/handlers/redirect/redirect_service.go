@@ -16,24 +16,32 @@ import (
 
 // FindOriginalURLAndRedirect is a function that redirects the user to the original URL
 func FindOriginalURLAndRedirect(cfg *config.Config) gin.HandlerFunc {
-
 	return func(c *gin.Context) {
 
 		shortURL := c.Param("shortURL")
 
-		originalURL, err := cfg.Redis.Get(context.Background(), shortURL).Result()
-		if err == redis.Nil {
-			c.JSON(404, gin.H{"error": "URL not found"})
-			return
-		} else if err != nil {
-			c.JSON(500, gin.H{"error": "Internal server error: " + err.Error()})
+		originalURL, err := getOriginalURLFromRedis(shortURL, cfg)
+		if err != nil {
+			if err == redis.Nil {
+				c.JSON(404, gin.H{"error": "URL not found"})
+			} else {
+				c.JSON(500, gin.H{"error": "Internal server error: " + err.Error()})
+			}
 			return
 		}
 
 		c.Redirect(302, originalURL)
-
 		go insertAnalyticsInMongo(originalURL, c.ClientIP(), cfg)
 	}
+}
+
+// getOriginalURLFromRedis is a function that retrieves the original URL from Redis
+func getOriginalURLFromRedis(shortURL string, cfg *config.Config) (string, error) {
+	originalURL, err := cfg.Redis.Get(context.Background(), shortURL).Result()
+	if err != nil {
+		return "", err
+	}
+	return originalURL, nil
 }
 
 // insertAnalyticsInMongo is a function that inserts the analytics data in MongoDB
