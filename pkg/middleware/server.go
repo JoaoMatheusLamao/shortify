@@ -1,10 +1,11 @@
-package config
+package middleware
 
 import (
 	"context"
 	"log"
 	"net/http"
 	"os"
+	"shortify/internal/config"
 	"strconv"
 	"time"
 
@@ -16,7 +17,7 @@ import (
 )
 
 // SetupServer sets up a new gin engine with a semaphore and cors middleware
-func SetupServer(rd *Config) (engine *gin.Engine) {
+func SetupServer(rd *config.Config) (engine *gin.Engine) {
 
 	gin.SetMode(gin.ReleaseMode)
 	engine = gin.New()
@@ -52,7 +53,7 @@ func setupCors(engine *gin.Engine) {
 	}))
 }
 
-func setupRedisDB(engine *gin.Engine, cfg *Config) {
+func setupRedisDB(engine *gin.Engine, cfg *config.Config) {
 	cfg.Redis.FlushAll(context.Background())
 	engine.Use(func(c *gin.Context) {
 		ip := c.ClientIP()
@@ -107,7 +108,6 @@ func getMaxThrottlingRules() (countByIP int64, countGlobal int64) {
 
 // setupSSL is a function that sets up the SSL configuration for the server
 func setupSSL(engine *gin.Engine) {
-
 	engine.Use(func(c *gin.Context) {
 		secureMiddleware := secure.New(secure.Options{
 			SSLRedirect: true,

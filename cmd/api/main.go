@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
-	"shortify/pkg/config"
-	"shortify/pkg/routes"
+	"shortify/internal/config"
+	"shortify/internal/routes"
+	"shortify/pkg/middleware"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -15,13 +17,15 @@ func main() {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
+	fmt.Println((os.Getenv("ENVIROMENT_EXEC")))
+
 	cfg, err := config.NewConfig()
 	if err != nil {
 		log.Fatalf("Error creating config: %v", err)
 	}
 	defer cfg.CloseAll()
 
-	engine := config.SetupServer(cfg)
+	engine := middleware.SetupServer(cfg)
 
 	routes.InitiateRoutes(engine, cfg)
 

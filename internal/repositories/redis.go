@@ -1,4 +1,4 @@
-package config
+package repositories
 
 import (
 	"context"
@@ -15,28 +15,29 @@ type RedisInternal struct {
 	mu    sync.Mutex
 }
 
-// newClientRedis is a function that returns a new Redis client
-func (cfg *Config) newClientRedis() error {
-
-	addr := "localhost:6379"
-
-	enviroment := os.Getenv("ENVIROMENT_EXEC")
-	if enviroment == "prod" {
-		addr = "redis:6379"
-	}
+// NewRedisInternal is a function that returns a new RedisInternal struct
+func NewRedisInternal() (*RedisInternal, error) {
+	addr := getRedisAddress()
 
 	rdb := redis.NewClient(&redis.Options{
 		Addr: addr,
 	})
 
-	cfg.Redis = &RedisInternal{
-		Redis: rdb,
-		mu:    sync.Mutex{},
+	if _, err := rdb.Ping(context.Background()).Result(); err != nil {
+		return nil, err
 	}
 
-	_, err := rdb.Ping(context.Background()).Result()
+	return &RedisInternal{
+		Redis: rdb,
+		mu:    sync.Mutex{},
+	}, nil
+}
 
-	return err
+func getRedisAddress() string {
+	if os.Getenv("ENVIROMENT_EXEC") == "prod" {
+		return "redis:6379"
+	}
+	return "localhost:6379"
 }
 
 // Get is a function that returns the value of a key

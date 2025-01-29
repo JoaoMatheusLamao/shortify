@@ -1,11 +1,11 @@
 package routes
 
 import (
-	"shortify/pkg/config"
-	"shortify/pkg/handlers/fieldmapper"
-	"shortify/pkg/handlers/healthcheck"
-	"shortify/pkg/handlers/redirect"
-	"shortify/pkg/handlers/shorten"
+	"shortify/internal/config"
+	"shortify/internal/handlers/fieldmapper"
+	"shortify/internal/handlers/healthcheck"
+	"shortify/internal/handlers/redirect"
+	"shortify/internal/handlers/shorten"
 
 	"github.com/gin-gonic/gin"
 )

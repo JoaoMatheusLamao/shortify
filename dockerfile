@@ -17,7 +17,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go application
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-extldflags '-static'" -o main .
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-extldflags '-static'" -o main ./cmd/api/main.go
 
 # Ensure the executable has the correct permissions
 RUN chmod +x main
@@ -39,7 +39,7 @@ RUN ls /etc/localtime
 
 # Copy the executable from the build stage
 COPY --from=build /app/main .
-COPY --from=build /app/.env .
+COPY --from=build /app/cmd/api/.env .
 
 # Ensure the executable has the correct permissions
 RUN chmod +rx main
